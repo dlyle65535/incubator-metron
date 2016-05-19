@@ -18,12 +18,11 @@
 package org.apache.metron.dataloads.bulk;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.lucene.index.IndexNotFoundException;
 import org.apache.metron.TestConstants;
 import org.apache.metron.common.configuration.Configuration;
-import org.elasticsearch.common.settings.ImmutableSettings;
 import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.indices.IndexMissingException;
-import org.elasticsearch.test.ElasticsearchIntegrationTest;
+import org.elasticsearch.test.ESIntegTestCase;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -39,8 +38,8 @@ import java.util.Date;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-@ElasticsearchIntegrationTest.ClusterScope(scope = ElasticsearchIntegrationTest.Scope.SUITE, numDataNodes = 1, numClientNodes = 0)
-public class ElasticsearchDataPrunerIntegrationTest extends ElasticsearchIntegrationTest {
+@ESIntegTestCase.ClusterScope(scope = ESIntegTestCase.Scope.SUITE, numDataNodes = 1, numClientNodes = 0)
+public class ElasticsearchDataPrunerIntegrationTest extends ESIntegTestCase {
 
     private static File dataPath = new File("./target/elasticsearch-test");
     private Date testingDate;
@@ -91,7 +90,7 @@ public class ElasticsearchDataPrunerIntegrationTest extends ElasticsearchIntegra
         configuration = new Configuration(resourcePath);
     }
 
-    @Test(expected = IndexMissingException.class)
+    @Test(expected = IndexNotFoundException.class)
     public void testWillThrowOnMissingIndex() throws Exception {
 
         ElasticsearchDataPruner pruner = new ElasticsearchDataPruner(yesterday, 30, configuration,client(), "*");
@@ -129,24 +128,30 @@ public class ElasticsearchDataPrunerIntegrationTest extends ElasticsearchIntegra
     @Override
     protected Settings nodeSettings(int nodeOrdinal) {
 
-        return ImmutableSettings.settingsBuilder()
-                .put("node.data", true)
-                .put("gateway.type", "none")
-                .put("path.data", dataPath.getPath() + "/data")
-                .put("path.work", dataPath.getPath() + "/work")
-                .put("path.logs", dataPath.getPath() + "/logs")
-                .put("cluster.routing.schedule", "50ms")
-                .put("node.local", true).build();
+
+        Settings.Builder settingsBuilder = Settings.settingsBuilder();
+        settingsBuilder.put("node.data", true);
+        settingsBuilder.put("path.data", dataPath.getPath() + "/data");
+        settingsBuilder.put("path.work", dataPath.getPath() + "/work");
+        settingsBuilder.put("path.logs", dataPath.getPath() + "/logs");
+        settingsBuilder.put("cluster.routing.schedule", "50ms");
+        settingsBuilder.put("node.local", true).build();
+
+        return settingsBuilder.build();
+
 
     }
 
     public Settings indexSettings() {
 
-        return ImmutableSettings.settingsBuilder()
-                .put("index.store.type", "memory")
-                .put("index.store.fs.memory.enabled", "true")
-                .put("index.number_of_shards", 1)
-                .put("index.number_of_replicas", 0).build();
+        Settings.Builder settingsBuilder = Settings.settingsBuilder();
+        settingsBuilder.put("index.store.type", "memory");
+        settingsBuilder.put("index.store.fs.memory.enabled", "true");
+        settingsBuilder.put("index.number_of_shards", 1);
+        settingsBuilder.put("index.number_of_replicas", 0).build();
+
+        return settingsBuilder.build();
+
 
     }
 
