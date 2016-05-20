@@ -71,8 +71,8 @@ public abstract class EnrichmentIntegrationTest extends BaseIntegrationTest {
   private String fluxPath = "../metron-enrichment/src/main/flux/enrichment/test.yaml";
   protected String testSensorType = "test";
   protected String hdfsDir = "target/enrichmentIntegrationTest/hdfs";
-  private String sampleParsedPath = TestConstants.SAMPLE_DATA_PARSED_PATH + "YafExampleParsed";
-  private String sampleIndexedPath = TestConstants.SAMPLE_DATA_INDEXED_PATH + "YafIndexed";
+  private String sampleParsedPath = TestConstants.SAMPLE_DATA_PARSED_PATH + "TestExampleParsed";
+  private String sampleIndexedPath = TestConstants.SAMPLE_DATA_INDEXED_PATH + "TestIndexed";
   protected static FieldNameConverter fieldNameConverter = null;
 
   public static class Provider implements TableProvider, Serializable {
