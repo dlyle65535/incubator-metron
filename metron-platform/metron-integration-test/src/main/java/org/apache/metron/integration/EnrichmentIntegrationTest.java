@@ -290,44 +290,46 @@ public abstract class EnrichmentIntegrationTest extends BaseIntegrationTest {
   }
 
   private static enum HostEnrichments implements Predicate<EvaluationPayload>{
+
     LOCAL_LOCATION(new Predicate<EvaluationPayload>() {
 
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
 
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.local")).equals("YES");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.local"),"").equals("YES");
 
       }
     })
+
     ,UNKNOWN_LOCATION(new Predicate<EvaluationPayload>() {
 
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.local")).equals("UNKNOWN");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.local"),"").equals("UNKNOWN");
       }
     })
     ,IMPORTANT(new Predicate<EvaluationPayload>() {
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.asset_value")).equals("important");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.asset_value"),"").equals("important");
       }
     })
     ,PRINTER_TYPE(new Predicate<EvaluationPayload>() {
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type")).equals("printer");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type"),"").equals("printer");
       }
     })
     ,WEBSERVER_TYPE(new Predicate<EvaluationPayload>() {
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type")).equals("webserver");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type"),"").equals("webserver");
       }
     })
     ,UNKNOWN_TYPE(new Predicate<EvaluationPayload>() {
       @Override
       public boolean apply(@Nullable EvaluationPayload evaluationPayload) {
-        return evaluationPayload.indexedDoc.get(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type")).equals("unknown");
+        return evaluationPayload.indexedDoc.getOrDefault(fieldNameConverter.convert("enrichments.host." + evaluationPayload.key + ".known_info.type"),"").equals("unknown");
       }
     })
     ;
@@ -356,16 +358,16 @@ public abstract class EnrichmentIntegrationTest extends BaseIntegrationTest {
     }
   }
   private static void simpleEnrichmentValidation(Map<String, Object> indexedDoc) {
-    if(indexedDoc.get(fieldNameConverter.convert(SRC_IP)).equals("10.0.2.3")
-            || indexedDoc.get(fieldNameConverter.convert(DST_IP)).equals("10.0.2.3")
+    if(indexedDoc.getOrDefault(fieldNameConverter.convert(SRC_IP),"").equals("10.0.2.3")
+            || indexedDoc.getOrDefault(fieldNameConverter.convert(DST_IP),"").equals("10.0.2.3")
             ) {
       Assert.assertTrue(keyPatternExists(fieldNameConverter.convert("enrichments.hbaseEnrichment"), indexedDoc));
-      if(indexedDoc.get(fieldNameConverter.convert(SRC_IP)).equals("10.0.2.3")) {
+      if(indexedDoc.getOrDefault(fieldNameConverter.convert(SRC_IP),"").equals("10.0.2.3")) {
         Assert.assertEquals(indexedDoc.get(fieldNameConverter.convert("enrichments.hbaseEnrichment." + SRC_IP + "." + PLAYFUL_CLASSIFICATION_TYPE+ ".orientation"))
                 , PLAYFUL_ENRICHMENT.get("orientation")
         );
       }
-      else if(indexedDoc.get(DST_IP).equals("10.0.2.3")) {
+      else if(indexedDoc.getOrDefault(fieldNameConverter.convert(DST_IP),"").equals("10.0.2.3")) {
         Assert.assertEquals( indexedDoc.get(fieldNameConverter.convert("enrichments.hbaseEnrichment." + DST_IP + "." + PLAYFUL_CLASSIFICATION_TYPE + ".orientation"))
                 , PLAYFUL_ENRICHMENT.get("orientation")
         );
@@ -374,13 +376,13 @@ public abstract class EnrichmentIntegrationTest extends BaseIntegrationTest {
 
   }
   private static void threatIntelValidation(Map<String, Object> indexedDoc) {
-    if(indexedDoc.get(fieldNameConverter.convert(SRC_IP)).equals("10.0.2.3")
-    || indexedDoc.get(fieldNameConverter.convert(DST_IP)).equals("10.0.2.3")
+    if(indexedDoc.getOrDefault(fieldNameConverter.convert(SRC_IP),"").equals("10.0.2.3")
+    || indexedDoc.getOrDefault(fieldNameConverter.convert(DST_IP),"").equals("10.0.2.3")
             ) {
       //if we have any threat intel messages, we want to tag is_alert to true
       Assert.assertTrue(keyPatternExists(fieldNameConverter.convert("threatintels."), indexedDoc));
       Assert.assertTrue(indexedDoc.containsKey(fieldNameConverter.convert("threat.triage.level")));
-      Assert.assertEquals(indexedDoc.get(fieldNameConverter.convert("is_alert")), "true");
+      Assert.assertEquals(indexedDoc.getOrDefault(fieldNameConverter.convert("is_alert"),""), "true");
       Assert.assertEquals((double)indexedDoc.get(fieldNameConverter.convert("threat.triage.level")), 10d, 1e-7);
     }
     else {
@@ -390,10 +392,10 @@ public abstract class EnrichmentIntegrationTest extends BaseIntegrationTest {
     }
     //ip threat intels
     if(keyPatternExists(fieldNameConverter.convert("threatintels.hbaseThreatIntel."), indexedDoc)) {
-      if(indexedDoc.get(fieldNameConverter.convert(SRC_IP)).equals("10.0.2.3")) {
+      if(indexedDoc.getOrDefault(fieldNameConverter.convert(SRC_IP),"").equals("10.0.2.3")) {
         Assert.assertEquals(indexedDoc.get(fieldNameConverter.convert("threatintels.hbaseThreatIntel." + SRC_IP + "." + MALICIOUS_IP_TYPE)), "alert");
       }
-      else if(indexedDoc.get(fieldNameConverter.convert(DST_IP)).equals("10.0.2.3")) {
+      else if(indexedDoc.getOrDefault(fieldNameConverter.convert(DST_IP),"").equals("10.0.2.3")) {
         Assert.assertEquals(indexedDoc.get(fieldNameConverter.convert("threatintels.hbaseThreatIntel." + DST_IP + "." + MALICIOUS_IP_TYPE)), "alert");
       }
       else {
