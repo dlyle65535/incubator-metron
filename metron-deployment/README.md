@@ -53,32 +53,50 @@ Navigate to `incubator-metron/metron-deployment/playbooks` and run:
 The Metron playbook will gather the necessary cluster settings from Ambari and install the Metron services.
 
 ### Setting up your inventory
-Edit the hosts file at `incubator-metron/metron-deployment/inventory/project_name/hosts`.  Declare where which hosts the
-Metron services will be installed on by updating these groups:
+Edit the hosts file at `incubator-metron/metron-deployment/inventory/project_name/hosts`.  Declare where the
+Metron services will be installed by updating these groups:
 
-- enrichment - submits the topology code to Storm and requires a storm client
-- search - host where Elasticsearch will be run
-- web - host where the Metron UI and underlying services will run
-- sensors - host where network data will be collected and published to Kafka
-
-The Metron topologies depend on Kafka topics and HBase tables being created beforehand.  Declare a host that has Kafka and HBase clients installed by updating these groups:
-
-- metron_kafka_topics
-- metron_hbase_tables
-
-If only installing Metron, these groups can be ignored:
-
-- ambari_master
-- ambari_slaves
+- [ambari_master] - host running Ambari
+- ]ambari_slaves] - all Ambari-managed hosts
+- [metron_kafka_topics] - host used to create the Kafka topics required by Metron. Requires a Kafka broker.
+- [meron_hbase_tables] - host used to create the HBase tables required by Metron. Requires a HBase client.
+- [enrichment] - submits the topology code to Storm and requires a Storm client
+- [search] - host(s) where Elasticsearch will be installed
+- [web] - host where the Metron UI and underlying services will be installed
+- [sensors] - host where network data will be collected and published to Kafka
 
 ### Configuring group variables
 The Metron Ansible scripts depend on a set of variables.  These variables can be found in the file at
-`incubator-metron/metron-deployment/inventory/project_name/group_vars/all`.  Edit the ambari* variables to match your Ambari
-instance and update the java_home variable to match the java path on your hosts.
+`incubator-metron/metron-deployment/inventory/project_name/group_vars/all`.  
 
+These variables are used to the deployment scripts to conform to your environment - look them over carefully. The most common changes are (defaults in italics):
+
+**Ansible**
+  - ansible_ssh_private_key_file: _/Path/to/private/key/file_ **Point to the private key file for ssh user on the target hosts**
+  - ansible_ssh_user: _root_ **The name of the ssh user on the target hosts (requires sudo)**
+  
+**Ambari**
+  - ambari_port: _8080_ **Change if your Ambari instance uses a non-default port**
+  - ambari_user: _admin_ **Change to user on your Ambari instance**
+  - ambari_password: _admin_ **Change to password for your Ambari user above**
+ 
+**Kafka**
+  - num_partitions: _3_ **Change to your desired number of partitions**
+  - retention_in_gb: _25_ **Change to your desired retention size**
+ 
+**Metron**
+  - java_home: _/usr/jdk64/jdk1.8.0_40_ **Location of Java on all hosts**
+  
+**Sensors**
+  - sensor_test_mode: _True_ **Change to false if not running traffic replay**
+  - sniff_interface: _eth0_ **Interface that the Metron sensors will sniff on the [sensors] host**
+
+**Search**
+  - elasticsearch_network_interface: _eth0_ **Bind inteface for the Elasticsearch host(s)**
+  
 ### Running the playbook
 Navigate to `incubator-metron/metron-deployment/playbooks` and run:
-`ansible-playbook -i ../inventory/project_name metron_install.yml`
+`ansible-playbook -i ../inventory/project_name metron_install.yml --skip-tags="solr"`
 
 ## Vagrant
 A VagrantFile is included and will install a working version of the entire Metron stack.  The following is required to
@@ -93,5 +111,4 @@ example of how to run a full end-to-end Metron install.
 
 
 ## TODO
-- migrate existing MySQL/GeoLite playbook
 - Support Ubuntu deployments

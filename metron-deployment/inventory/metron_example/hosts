@@ -29,17 +29,17 @@ node7
 node8
 
 [metron_hbase_tables]
-node9
+node8
 
 [metron_kafka_topics]
-node9
+node8
 
 [pcap_server]
 node9
 
 #3rd ambari_slave
 [enrichment]
-node1
+node4
 
 #1 or more
 [search]
