@@ -25,5 +25,5 @@ RUN wget http://apache.cs.utah.edu/maven/maven-3/3.2.5/binaries/apache-maven-3.2
 RUN tar xzvf apache-maven-3.2.5-bin.tar.gz
 RUN mv apache-maven-3.2.5 /opt/maven
 RUN ln -s /opt/maven/bin/mvn /usr/bin/mvn
-RUN yum -y install asciidoc rpm-build rpm2cpio tar unzip xmlto zip rpm-lint && yum clean all
+RUN yum -y install asciidoc rpm-build rpm2cpio tar unzip xmlto zip rpmlint && yum clean all
 WORKDIR /root
