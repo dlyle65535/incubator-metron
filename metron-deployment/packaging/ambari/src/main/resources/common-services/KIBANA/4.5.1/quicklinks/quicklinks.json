@@ -9,15 +9,16 @@
 
     "links": [
       {
-        "name": "kibana_master_ui",
-        "label": "Metron Dashboard",
+        "name": "metron_ui",
+        "label": "Metron UI",
         "requires_user_name": "false",
+        "component_name": "KIBANA_MASTER",
         "url":"%@://%@:%@/",
         "port":{
           "http_property": "kibana_server_port",
-          "http_default_port": "5601",
+          "http_default_port": "8744",
           "https_property": "kibana_server_port",
-          "https_default_port": "5601",
+          "https_default_port": "8744",
           "regex": "^(\\d+)$",
           "site": "kibana-env"
         }

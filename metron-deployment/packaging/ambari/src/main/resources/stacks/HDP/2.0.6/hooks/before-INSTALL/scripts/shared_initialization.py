@@ -17,20 +17,21 @@ limitations under the License.
 
 """
 
-import sys
-from resource_management import *
-from shared_initialization import *
-from repo_initialization import *
+import os
 
-class BeforeInstallHook(Hook):
+from resource_management.libraries.functions import stack_tools
+from resource_management.libraries.functions.version import compare_versions
+from resource_management.core.resources.packaging import Package
 
-  def hook(self, env):
-    import params
+def install_packages():
+  import params
+  if params.host_sys_prepped:
+    return
 
-    env.set_params(params)
-    
-    #install_repos()
-    install_packages()
-
-if __name__ == "__main__":
-  BeforeInstallHook().execute()
+  packages = ['unzip', 'curl','python-elasticsearch']
+  if params.stack_version_formatted != "" and compare_versions(params.stack_version_formatted, '2.2') >= 0:
+    stack_selector_package = stack_tools.get_stack_tool_package(stack_tools.STACK_SELECTOR_NAME)
+    packages.append(stack_selector_package)
+  Package(packages,
+          retry_on_repo_unavailability=params.agent_stack_retry_on_unavailability,
+          retry_count=params.agent_stack_retry_count)

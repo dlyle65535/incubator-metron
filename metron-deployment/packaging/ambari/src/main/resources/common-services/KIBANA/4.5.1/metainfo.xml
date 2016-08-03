@@ -48,21 +48,7 @@
             </components>
             <osSpecifics>
                 <osSpecific>
-                    <osFamily>redhat7,amazon2015,redhat6,suse11,suse12</osFamily>
-                    <packages>
-                        <package>
-                            <name>net-tools</name>
-                        </package>
-                        <package>
-                            <name>python-elasticsearch</name>
-                        </package>
-                        <package>
-                            <name>kibana-4.5.1</name>
-                        </package>
-                    </packages>
-                </osSpecific>
-                <osSpecific>
-                    <osFamily>debian7,ubuntu12,ubuntu14,ubuntu16</osFamily>
+                    <osFamily>any</osFamily>
                     <packages>
                         <package>
                             <name>kibana-4.5.1</name>
@@ -75,6 +61,12 @@
                 <config-type>kibana-site</config-type>
             </configuration-dependencies>
             <restartRequiredAfterChange>true</restartRequiredAfterChange>
+            <quickLinksConfigurations>
+                <quickLinksConfiguration>
+                    <fileName>quicklinks.json</fileName>
+                    <default>true</default>
+                </quickLinksConfiguration>
+            </quickLinksConfigurations>
         </service>
     </services>
 </metainfo>
