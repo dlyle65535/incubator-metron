@@ -61,14 +61,14 @@
                         </package>
                     </packages>
                 </osSpecific>
-                <!--<osSpecific>-->
-                    <!--<osFamily>debian7,ubuntu12,ubuntu14,ubuntu16</osFamily>-->
-                    <!--<packages>-->
-                        <!--<package>-->
-                            <!--<name>kibana-4.5.1</name>-->
-                        <!--</package>-->
-                    <!--</packages>-->
-                <!--</osSpecific>-->
+                <osSpecific>
+                    <osFamily>debian7,ubuntu12,ubuntu14,ubuntu16</osFamily>
+                    <packages>
+                        <package>
+                            <name>kibana-4.5.1</name>
+                        </package>
+                    </packages>
+                </osSpecific>
             </osSpecifics>
             <configuration-dependencies>
                 <config-type>kibana-env</config-type>

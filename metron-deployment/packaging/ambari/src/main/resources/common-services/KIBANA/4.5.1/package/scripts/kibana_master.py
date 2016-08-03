@@ -28,6 +28,7 @@ from kibana_template_load import loadkibanatemplate
 import sys
 
 class Kibana(Script):
+
     def install(self, env):
         import params
         env.set_params(params)
