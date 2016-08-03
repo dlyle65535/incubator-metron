@@ -34,6 +34,16 @@
                         <scriptType>PYTHON</scriptType>
                         <timeout>600</timeout>
                     </commandScript>
+                    <customCommands>
+                        <customCommand>
+                            <name>LOADTEMPLATE</name>
+                            <background>false</background>
+                            <commandScript>
+                                <script>scripts/kibana_master.py</script>
+                                <scriptType>PYTHON</scriptType>
+                            </commandScript>
+                        </customCommand>
+                    </customCommands>
                 </component>
             </components>
             <osSpecifics>
@@ -44,21 +54,25 @@
                             <name>net-tools</name>
                         </package>
                         <package>
-                            <name>kibana-4.5.1</name>
+                            <name>python-elasticsearch</name>
                         </package>
-                    </packages>
-                </osSpecific>
-                <osSpecific>
-                    <osFamily>debian7,ubuntu12,ubuntu14,ubuntu16</osFamily>
-                    <packages>
                         <package>
                             <name>kibana-4.5.1</name>
                         </package>
                     </packages>
                 </osSpecific>
+                <!--<osSpecific>-->
+                    <!--<osFamily>debian7,ubuntu12,ubuntu14,ubuntu16</osFamily>-->
+                    <!--<packages>-->
+                        <!--<package>-->
+                            <!--<name>kibana-4.5.1</name>-->
+                        <!--</package>-->
+                    <!--</packages>-->
+                <!--</osSpecific>-->
             </osSpecifics>
             <configuration-dependencies>
-                  <config-type>kibana-env</config-type>
+                <config-type>kibana-env</config-type>
+                <config-type>kibana-site</config-type>
             </configuration-dependencies>
             <restartRequiredAfterChange>true</restartRequiredAfterChange>
         </service>

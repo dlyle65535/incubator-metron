@@ -23,7 +23,9 @@ kibana_master
 from kibana import kibana
 from resource_management.core.resources.system import Execute
 from resource_management.libraries.script import Script
-
+from resource_management.libraries.functions.format import format
+from kibana_template_load import loadkibanatemplate
+import sys
 
 class Kibana(Script):
     def install(self, env):
@@ -39,14 +41,14 @@ class Kibana(Script):
                 "gpgcheck=1\n"
                 "gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch\n"
                 "enabled=1\" > /etc/yum.repos.d/kibana.repo")
-
+        #TODO: figure out why all packages aren't being installed
         self.install_packages(env)
 
     def configure(self, env):
         import params
         env.set_params(params)
 
-        print 'Install plugins'
+        print 'Configure Kibana for Metron'
         kibana()
 
     def stop(self, env):
@@ -81,6 +83,10 @@ class Kibana(Script):
         print 'Status of the Master'
         Execute(status_cmd)
 
+    def loadtemplate(self,env):
+        import params
+        env.set_params(params)
+        loadkibanatemplate(env)
 
 if __name__ == "__main__":
     Kibana().execute()

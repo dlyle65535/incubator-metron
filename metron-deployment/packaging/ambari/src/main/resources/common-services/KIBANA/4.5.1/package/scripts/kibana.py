@@ -27,7 +27,6 @@ from resource_management.core.source import Template
 
 
 def kibana():
-    print "INSIDE THE %s" % __file__
     import params
 
     directories = [params.log_dir, params.pid_dir, params.conf_dir]
