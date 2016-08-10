@@ -24,7 +24,8 @@ from kibana import kibana
 from resource_management.core.resources.system import Execute
 from resource_management.libraries.script import Script
 from resource_management.libraries.functions.format import format
-from kibana_template_load import loadkibanatemplate
+
+
 import sys
 
 class Kibana(Script):
@@ -42,8 +43,8 @@ class Kibana(Script):
                 "gpgcheck=1\n"
                 "gpgkey=https://packages.elastic.co/GPG-KEY-elasticsearch\n"
                 "enabled=1\" > /etc/yum.repos.d/kibana.repo")
-        #TODO: figure out why all packages aren't being installed
         self.install_packages(env)
+        self.loadtemplate(env)
 
     def configure(self, env):
         import params
@@ -85,6 +86,7 @@ class Kibana(Script):
         Execute(status_cmd)
 
     def loadtemplate(self,env):
+        from kibana_template_load import loadkibanatemplate
         import params
         env.set_params(params)
         loadkibanatemplate(env)

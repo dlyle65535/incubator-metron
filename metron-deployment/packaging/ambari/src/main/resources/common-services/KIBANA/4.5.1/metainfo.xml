@@ -51,6 +51,9 @@
                     <osFamily>any</osFamily>
                     <packages>
                         <package>
+                            <name>python-elasticsearch</name>
+                        </package>
+                        <package>
                             <name>kibana-4.5.1</name>
                         </package>
                     </packages>

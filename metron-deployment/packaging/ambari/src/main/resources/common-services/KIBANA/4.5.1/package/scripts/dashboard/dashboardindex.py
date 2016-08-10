@@ -23,6 +23,7 @@ import argparse, sys, os.path
 import errno
 import os
 
+
 class DashboardIndex(object):
 
     def __init__(self, host='localhost', port=9200, url_prefix='', timeout=10, **kwargs):
