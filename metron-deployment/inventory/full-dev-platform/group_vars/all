@@ -19,14 +19,13 @@
 services_to_start:
   - mysql
   - elasticsearch
-  - pcap-service
   - kibana
   - snort
   - snort-logs
-  - bro
-  - pcap-replay
-  - bro-parser
   - snort-parser
+  - bro
+  - bro-parser
+  - pcap-replay
   - enrichment
   - indexing
 
