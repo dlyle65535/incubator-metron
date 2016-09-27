@@ -52,11 +52,13 @@ public abstract class ConfiguredParserBolt extends ConfiguredBolt<ParserConfigur
   }
   @Override
   public void loadConfig() {
+    LOG.info("Loading Config");
     try {
       ConfigurationsUtils.updateParserConfigsFromZookeeper(getConfigurations(), client);
     } catch (Exception e) {
       LOG.warn("Unable to load configs from zookeeper, but the cache should load lazily...");
     }
+    LOG.info("Config Loaded");
   }
 
   @Override

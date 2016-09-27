@@ -88,7 +88,9 @@ public abstract class ConfiguredBolt<CONFIG_T extends Configurations> extends Ba
           }
         };
         cache.getListenable().addListener(listener);
+        LOG.info("Loading Config");
         loadConfig();
+        LOG.info("Done Loading Config");
       }
       cache.start();
     } catch (Exception e) {

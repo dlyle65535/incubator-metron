@@ -22,6 +22,7 @@ import org.apache.curator.RetryPolicy;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.ExponentialBackoffRetry;
+import org.apache.log4j.Logger;
 import org.apache.metron.common.Constants;
 import org.apache.metron.common.configuration.enrichment.SensorEnrichmentConfig;
 import org.apache.metron.common.utils.JSONUtils;
@@ -43,6 +44,7 @@ import static org.apache.metron.common.configuration.ConfigurationType.PROFILER;
 
 public class ConfigurationsUtils {
 
+  private static final Logger LOG = Logger.getLogger(ConfigurationsUtils.class);
   public static CuratorFramework getClient(String zookeeperUrl) {
     RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);
     return CuratorFrameworkFactory.newClient(zookeeperUrl, retryPolicy);
@@ -133,7 +135,7 @@ public class ConfigurationsUtils {
   }
 
   public static void writeToZookeeper(String path, byte[] configData, CuratorFramework client) throws Exception {
-    try {
+    try {af
       client.setData().forPath(path, configData);
     } catch (KeeperException.NoNodeException e) {
       client.create().creatingParentsIfNeeded().forPath(path, configData);
@@ -141,6 +143,13 @@ public class ConfigurationsUtils {
   }
 
   public static void updateConfigsFromZookeeper(Configurations configurations, CuratorFramework client) throws Exception {
+    byte[] bytes = readGlobalConfigBytesFromZookeeper(client);
+    if(null == bytes){
+      LOG.info("No bytes!!?");
+    } else {
+      LOG.info("Bytes: " + new String(bytes));
+    }
+
     configurations.updateGlobalConfig(readGlobalConfigBytesFromZookeeper(client));
   }
 
