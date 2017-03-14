@@ -172,3 +172,17 @@ metron_config_zeppelin_path = format("{metron_config_path}/zeppelin")
 
 #kafka_security
 kafka_security_protocol = config['configurations']['metron-env']['kafka_security_protocol']
+
+# Security
+security_enabled = status_params.security_enabled
+
+if security_enabled:
+    hostname_lowercase = config['hostname'].lower()
+    metron_principal_name = config['configurations']['metron-env']['metron_principal_name']
+    metron_jaas_principal = metron_principal_name.replace('_HOST', hostname_lowercase)
+    ambari_principal_name = default('/configurations/cluster-env/ambari_principal_name', None)
+    metron_keytab_path = config['configurations']['metron-env']['metron_keytab']
+    kinit_path_local = status_params.kinit_path_local
+
+    hbase_principal_name = config['configurations']['hbase-env']['hbase_principal_name']
+    hbase_keytab_path = config['configurations']['hbase-env']['hbase_user_keytab']

@@ -17,6 +17,8 @@ limitations under the License.
 
 import os
 import time
+from resource_management.libraries.functions.format import format as ambari_format
+from resource_management.core import global_lock
 from resource_management.core.logger import Logger
 from resource_management.core.resources.system import Execute, File
 
@@ -112,7 +114,7 @@ class EnrichmentCommands:
                                    action="create_on_execute",
                                    owner=self.__params.metron_user,
                                    group=self.__params.metron_group,
-                                   mode=0775,
+                                   mode=0775
                                    )
 
         Logger.info("Creating and loading GeoIp database")
@@ -206,6 +208,17 @@ class EnrichmentCommands:
 
     def create_hbase_tables(self):
         Logger.info("Creating HBase Tables")
+        # prevent concurrent kinit
+        if self.__params.security_enabled:
+            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
+            kinit_lock.acquire()
+            kinitcmd = ambari_format("{kinit_path_local} -kt {hbase_keytab_path} {hbase_principal_name}; ")
+            Logger.info("kinit command: " + kinitcmd)
+            try:
+                Execute(kinitcmd, user=self.__params.metron_user)
+            finally:
+                kinit_lock.release()
+
         add_enrichment_cmd = "echo \"create '{0}','{1}'\" | hbase shell -n".format(self.__params.enrichment_table, self.__params.enrichment_cf)
         Execute(add_enrichment_cmd,
                 tries=3,

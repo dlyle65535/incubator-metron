@@ -15,7 +15,6 @@ limitations under the License.
 """
 
 from resource_management.core.exceptions import ComponentIsNotRunning
-from resource_management.core.logger import Logger
 from resource_management.core.resources.system import File
 from resource_management.core.source import Template
 from resource_management.libraries.functions.format import format
@@ -50,10 +49,10 @@ class Enrichment(Script):
         commands = EnrichmentCommands(params)
         metron_service.load_global_config(params)
 
-        if not commands.is_kafka_configured():
-            commands.init_kafka_topics()
         if not commands.is_hbase_configured():
             commands.create_hbase_tables()
+        if not commands.is_kafka_configured():
+            commands.init_kafka_topics()
         if not commands.is_geo_configured():
             commands.init_geo()
 
