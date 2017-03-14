@@ -192,9 +192,6 @@ class EnrichmentCommands:
                                         topic),
                     user=self.__params.kafka_user)
 
-
-
-
         Logger.info("Done creating Kafka topics")
         self.set_kafka_configured()
 
@@ -266,6 +263,15 @@ class EnrichmentCommands:
                 user=self.__params.metron_user
                 )
 
+        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal_name, self.__params.enrichment_table)
+        Execute(add_enrichment_acl_cmd,
+                tries=3,
+                try_sleep=5,
+                logoutput=False,
+                path='/usr/sbin:/sbin:/usr/local/bin:/bin:/usr/bin',
+                user=self.__params.metron_user
+                )
+
         add_threatintel_cmd = "echo \"create '{0}','{1}'\" | hbase shell -n".format(self.__params.threatintel_table, self.__params.threatintel_cf)
         Execute(add_threatintel_cmd,
                 tries=3,
@@ -274,5 +280,16 @@ class EnrichmentCommands:
                 path='/usr/sbin:/sbin:/usr/local/bin:/bin:/usr/bin',
                 user=self.__params.metron_user
                 )
+
+        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal_name, self.__params.threatintel_table)
+        Execute(add_enrichment_acl_cmd,
+                tries=3,
+                try_sleep=5,
+                logoutput=False,
+                path='/usr/sbin:/sbin:/usr/local/bin:/bin:/usr/bin',
+                user=self.__params.metron_user
+                )
+
+
         Logger.info("Done creating HBase Tables")
         self.set_hbase_configured()
