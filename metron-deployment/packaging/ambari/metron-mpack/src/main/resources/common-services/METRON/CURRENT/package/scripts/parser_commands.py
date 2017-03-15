@@ -23,10 +23,10 @@ import re
 import subprocess
 import time
 
-from resource_management.core import global_lock
 from resource_management.core.logger import Logger
 from resource_management.core.resources.system import Execute, File
 from resource_management.libraries.functions.format import format as ambari_format
+from metron_security import kinit
 
 import metron_service
 
@@ -61,16 +61,12 @@ class ParserCommands:
         Logger.info(
             "Copying grok patterns from local directory '{0}' to HDFS '{1}'".format(self.__params.local_grok_patterns_dir,
                                                                                     self.__params.hdfs_grok_patterns_dir))
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {metron_keytab_path} {metron_jaas_principal}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.metron_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.metron_keytab_path,
+                  self.__params.metron_jaas_principal,
+                  self.__params.metron_user)
+
         self.__params.HdfsResource(self.__params.hdfs_grok_patterns_dir,
                                    type="directory",
                                    action="create_on_execute",
@@ -110,16 +106,19 @@ class ParserCommands:
 
     def init_kafka_topics(self):
         Logger.info('Creating Kafka topics')
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {kafka_keytab_path} {kafka_principal_name}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.kafka_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.kafka_keytab_path,
+                  self.__params.kafka_principal_name,
+                  self.__params.kafka_user)
+            # kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
+            # kinit_lock.acquire()
+            # kinitcmd = ambari_format("{kinit_path_local} -kt {kafka_keytab_path} {kafka_principal_name}; ")
+            # Logger.info("kinit command: " + kinitcmd)
+            # try:
+            #     Execute(kinitcmd, user=self.__params.kafka_user)
+            # finally:
+            #     kinit_lock.release()
 
         command_template = """{0}/kafka-topics.sh \
                                 --zookeeper {1} \
@@ -208,7 +207,7 @@ class ParserCommands:
     def topologies_running(self, env):
         env.set_params(self.__params)
         all_running = True
-        topologies = metron_service.get_running_topologies()
+        topologies = metron_service.get_running_topologies(self.__params)
         for parser in self.get_parser_list():
             parser_found = False
             is_running = False

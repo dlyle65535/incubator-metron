@@ -71,12 +71,6 @@
         <display-name>Topic Retention</display-name>
     </property>
     <property>
-        <name>kafka_security_protocol</name>
-        <description>PLAINTEXT or PLAINTEXTSASL</description>
-        <display-name>Kafka Security Protocol</display-name>
-        <value>PLAINTEXT</value>
-    </property>
-    <property>
         <name>parsers</name>
         <value>bro,snort,yaf</value>
         <description>Metron parsers to deploy</description>
@@ -136,8 +130,8 @@
         <description>Metron principal name</description>
     </property>
     <property>
-        <name>metron_user_keytab</name>
-        <display-name>Metron User Keytab</display-name>
+        <name>metron_keytab</name>
+        <display-name>Metron Keytab</display-name>
         <description>Metron keytab path</description>
     </property>
     <property>

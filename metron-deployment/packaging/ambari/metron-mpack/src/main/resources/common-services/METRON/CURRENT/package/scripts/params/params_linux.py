@@ -169,8 +169,8 @@ error_index_path = tmp_dir + "/error_index.template"
 # Zeppelin Notebooks
 metron_config_zeppelin_path = format("{metron_config_path}/zeppelin")
 
-#kafka_security
-kafka_security_protocol = config['configurations']['metron-env']['kafka_security_protocol']
+# kafka_security
+kafka_security_protocol = config['configurations']['kafka-broker']['security.inter.broker.protocol']
 
 # Security
 security_enabled = status_params.security_enabled
@@ -180,7 +180,7 @@ if security_enabled:
     metron_principal_name = config['configurations']['metron-env']['metron_principal_name']
     metron_jaas_principal = metron_principal_name.replace('_HOST', hostname_lowercase)
     ambari_principal_name = default('/configurations/cluster-env/ambari_principal_name', None)
-    metron_keytab_path = config['configurations']['metron-env']['metron_keytab']
+    metron_keytab_path = config['configurations']['metron-env']['metron_service_keytab']
     kinit_path_local = status_params.kinit_path_local
 
     hbase_principal_name = config['configurations']['hbase-env']['hbase_principal_name']
@@ -191,5 +191,8 @@ if security_enabled:
     kafka_principal_name = kafka_principal_raw.replace('_HOST', hostname_lowercase)
     kafka_keytab_path = config['configurations']['kafka-env']['kafka_keytab']
 
-    storm_principal_name = config['configurations']['storm-env']['storm_principal_name']
+    storm_user = config['configurations']['storm-env']['storm_user']
+    storm_principal_name = status_params.storm_principal_name
+    storm_principal = storm_principal_name.split('@', 1)[0]
+    storm_keytab_path = status_params.storm_keytab_path
 

@@ -21,7 +21,7 @@
               "name": "${cluster-env/user_group}",
               "access": "r"
             },
-            "configuration": "metron-env/metron_user_keytab"
+            "configuration": "metron-env/metron_keytab"
           }
         }
       ],

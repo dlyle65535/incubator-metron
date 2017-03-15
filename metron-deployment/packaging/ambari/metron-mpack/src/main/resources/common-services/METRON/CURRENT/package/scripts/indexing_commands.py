@@ -20,9 +20,8 @@ import time
 
 from resource_management.core.logger import Logger
 from resource_management.core.resources.system import Execute, File
-from resource_management.libraries.functions.format import format as ambari_format
-from resource_management.core import global_lock
 
+from metron_security import kinit
 import metron_service
 
 
@@ -77,14 +76,10 @@ class IndexingCommands:
         Logger.info('Creating Kafka topics')
         # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {kafka_keytab_path} {kafka_principal_name}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.kafka_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.kafka_keytab_path,
+                  self.__params.kafka_principal_name,
+                  self.__params.kafka_user)
 
         command_template = """{0}/kafka-topics.sh \
                                 --zookeeper {1} \
@@ -124,16 +119,12 @@ class IndexingCommands:
 
     def init_hdfs_dir(self):
         Logger.info('Creating HDFS indexing directory')
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {metron_keytab_path} {metron_jaas_principal}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.metron_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.metron_keytab_path,
+                  self.__params.metron_jaas_principal,
+                  self.__params.metron_user)
+
         self.__params.HdfsResource(self.__params.metron_apps_indexed_hdfs_dir,
                                    type="directory",
                                    action="create_on_execute",
@@ -141,7 +132,6 @@ class IndexingCommands:
                                    mode=0775,
                                    )
         Logger.info('Done creating HDFS indexing directory')
-
 
     def start_indexing_topology(self):
         Logger.info("Starting Metron indexing topology: {0}".format(self.__indexing))
@@ -182,7 +172,7 @@ class IndexingCommands:
     def is_topology_active(self, env):
         env.set_params(self.__params)
         active = True
-        topologies = metron_service.get_running_topologies()
+        topologies = metron_service.get_running_topologies(self.__params)
         is_running = False
         if self.__indexing in topologies:
             is_running = topologies[self.__indexing] in ['ACTIVE', 'REBALANCING']

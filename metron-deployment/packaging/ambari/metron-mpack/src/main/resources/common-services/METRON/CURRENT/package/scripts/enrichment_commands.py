@@ -17,10 +17,9 @@ limitations under the License.
 
 import os
 import time
-from resource_management.libraries.functions.format import format as ambari_format
-from resource_management.core import global_lock
 from resource_management.core.logger import Logger
 from resource_management.core.resources.system import Execute, File
+from metron_security import kinit
 
 import metron_service
 
@@ -108,16 +107,19 @@ class EnrichmentCommands:
             raise ValueError("Unsupported repo type '{0}'".format(repo_type))
 
     def init_geo(self):
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {metron_keytab_path} {metron_jaas_principal}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.metron_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                                 self.__params.metron_keytab_path,
+                                 self.__params.metron_jaas_principal,
+                                 self.__params.metron_user)
+            # kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
+            # kinit_lock.acquire()
+            # kinitcmd = ambari_format("{kinit_path_local} -kt {metron_keytab_path} {metron_jaas_principal}; ")
+            # Logger.info("kinit command: " + kinitcmd)
+            # try:
+            #     Execute(kinitcmd, user=self.__params.metron_user)
+            # finally:
+            #     kinit_lock.release()
 
         Logger.info("Creating HDFS location for GeoIP database")
         self.__params.HdfsResource(self.__params.geoip_hdfs_dir,
@@ -144,16 +146,19 @@ class EnrichmentCommands:
 
     def init_kafka_topics(self):
         Logger.info('Creating Kafka topics')
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {kafka_keytab_path} {kafka_principal_name}; ")
-            Logger.info("kinit command: " + kinitcmd)
-            try:
-                Execute(kinitcmd, user=self.__params.kafka_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.kafka_keytab_path,
+                  self.__params.kafka_principal_name,
+                  self.__params.kafka_user)
+            # kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
+            # kinit_lock.acquire()
+            # kinitcmd = ambari_format("{kinit_path_local} -kt {kafka_keytab_path} {kafka_principal_name}; ")
+            # Logger.info("kinit command: " + kinitcmd)
+            # try:
+            #     Execute(kinitcmd, user=self.__params.kafka_user)
+            # finally:
+            #     kinit_lock.release()
 
         topic_template = """{0}/kafka-topics.sh \
                                 --zookeeper {1} \
@@ -234,7 +239,7 @@ class EnrichmentCommands:
         env.set_params(self.__params)
 
         active = True
-        topologies = metron_service.get_running_topologies()
+        topologies = metron_service.get_running_topologies(self.__params)
         is_running = False
         if self.__enrichment_topology in topologies:
             is_running = topologies[self.__enrichment_topology] in ['ACTIVE', 'REBALANCING']
@@ -243,16 +248,11 @@ class EnrichmentCommands:
 
     def create_hbase_tables(self):
         Logger.info("Creating HBase Tables")
-        # prevent concurrent kinit
         if self.__params.security_enabled:
-            kinit_lock = global_lock.get_lock(global_lock.LOCK_TYPE_KERBEROS)
-            kinit_lock.acquire()
-            kinitcmd = ambari_format("{kinit_path_local} -kt {hbase_keytab_path} {hbase_principal_name}; ")
-            Logger.info("kinit command: " + kinitcmd + " as user: " + self.__params.metron_user)
-            try:
-                Execute(kinitcmd, user=self.__params.metron_user)
-            finally:
-                kinit_lock.release()
+            kinit(self.__params.kinit_path_local,
+                  self.__params.hbase_keytab_path,
+                  self.__params.hbase_principal_name,
+                  self.__params.metron_user)
 
         add_enrichment_cmd = "echo \"create '{0}','{1}'\" | hbase shell -n".format(self.__params.enrichment_table, self.__params.enrichment_cf)
         Execute(add_enrichment_cmd,
@@ -263,7 +263,7 @@ class EnrichmentCommands:
                 user=self.__params.metron_user
                 )
 
-        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal_name, self.__params.enrichment_table)
+        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal, self.__params.enrichment_table)
         Execute(add_enrichment_acl_cmd,
                 tries=3,
                 try_sleep=5,
@@ -281,7 +281,7 @@ class EnrichmentCommands:
                 user=self.__params.metron_user
                 )
 
-        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal_name, self.__params.threatintel_table)
+        add_enrichment_acl_cmd = "echo \"grant '{0}', 'RW', '{1}'\" | hbase shell -n".format(self.__params.storm_principal, self.__params.threatintel_table)
         Execute(add_enrichment_acl_cmd,
                 tries=3,
                 try_sleep=5,
@@ -290,6 +290,7 @@ class EnrichmentCommands:
                 user=self.__params.metron_user
                 )
 
-
         Logger.info("Done creating HBase Tables")
         self.set_hbase_configured()
+
+
