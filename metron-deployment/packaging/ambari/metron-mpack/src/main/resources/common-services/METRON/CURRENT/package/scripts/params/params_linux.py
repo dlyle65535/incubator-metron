@@ -170,7 +170,7 @@ error_index_path = tmp_dir + "/error_index.template"
 metron_config_zeppelin_path = format("{metron_config_path}/zeppelin")
 
 # kafka_security
-kafka_security_protocol = config['configurations']['kafka-broker']['security.inter.broker.protocol']
+kafka_security_protocol = config['configurations']['kafka-broker'].get('security.inter.broker.protocol', 'PLAINTEXT')
 
 # Security
 security_enabled = status_params.security_enabled
